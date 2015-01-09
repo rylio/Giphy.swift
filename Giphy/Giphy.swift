@@ -350,7 +350,7 @@ public class Giphy {
 
 		:returns: An NSURLSessionDataTask for the request that has already been resumed.
 	*/
-	public func trending(limit: UInt?, rating: Gif.Rating?, completionHandler: ([Gif]?, Pagination?, NSError?) -> Void) -> NSURLSessionDataTask {
+	public func trending(limit: UInt?, offset: UInt?, rating: Gif.Rating?, completionHandler: ([Gif]?, Pagination?, NSError?) -> Void) -> NSURLSessionDataTask {
 
 		var params: [String : AnyObject] = [:]
 		if let lim = limit {
@@ -358,6 +358,9 @@ public class Giphy {
 		}
 		if let rat = rating {
 			params["rating"] = rat.rawValue
+		}
+		if let off = offset {
+			params["offset"] = offset
 		}
 
 		return performRequest("trending", params: params, completionHandler: completionHandler)
