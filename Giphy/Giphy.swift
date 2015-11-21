@@ -93,14 +93,16 @@ public class Giphy {
 
 			init(dict: [String: AnyObject]) {
 
-				URL = NSURL(string: dict["url"] as String)!
-				width = dict["width"] as Int
-				height = dict["height"] as Int
+				URL = NSURL(string: dict["url"] as! String)!
+				width = dict["width"] as! Int
+				height = dict["height"] as! Int
 				size = dict["size"] as? Int
 				frames = dict["frames"] as? Int
 				if let mp4 = dict["mp4"] as? String {
 					mp4URL = NSURL(string: mp4)
-				}
+                } else {
+                    mp4URL = NSURL()
+                }
 			}
 		}
 
@@ -109,17 +111,17 @@ public class Giphy {
 
 		/// The giphy id for the gif.
 		public var id: String {
-			return json["id"] as String
+			return json["id"] as! String
 		}
 
 		/// The URL to the giphy page of the gif.
 		public var giphyURL: NSURL {
-			return NSURL(string: json["url"] as String)!
+			return NSURL(string: json["url"] as! String)!
 		}
 
 		/// User discretion rating of the gif.
 		public var rating: Rating {
-			return Rating(rawValue: json["rating"] as String)!
+			return Rating(rawValue: json["rating"] as! String)!
 		}
 
 		init(json: [String:AnyObject]) {
@@ -129,9 +131,9 @@ public class Giphy {
 		/**
 			Get the metadata for an image type.
 			
-			:param: type The image type.
+			- parameter type: The image type.
 			
-			:param: still Whether the metadata should be of a still of the image version. No stills are available for downsampled versions.
+			- parameter still: Whether the metadata should be of a still of the image version. No stills are available for downsampled versions.
 		
 			:return: The image metadata for the image type.
 		*/
@@ -147,41 +149,41 @@ public class Giphy {
 			} else  {
 
 				var dict: [String:AnyObject] = [:]
-				let img = json["image_url"] as String
-				let noPath = img.stringByDeletingLastPathComponent
+				let img = json["image_url"] as! NSURL
+				let noPath = img.URLByDeletingLastPathComponent!
 
 				switch type {
 				case .FixedHeight:
-					dict["url"] = noPath.stringByAppendingPathComponent("200.gif")
-					dict["width"] = (json["fixed_height_downsampled_width"] as String).toInt()!
+					dict["url"] = noPath.URLByAppendingPathComponent("200.gif")
+					dict["width"] = Int(json["fixed_height_downsampled_width"] as! String)!
 					dict["height"] = 200
-					dict["mp4"] = noPath.stringByAppendingPathComponent("200.mp4")
+					dict["mp4"] = noPath.URLByAppendingPathComponent("200.mp4")
 
 				case .FixedHeightDownsampled:
-					dict["url"] = noPath.stringByAppendingPathComponent("200_d.gif")
-					dict["width"] = (json["fixed_height_downsampled_width"] as String).toInt()!
+					dict["url"] = noPath.URLByAppendingPathComponent("200_d.gif")
+					dict["width"] = Int(json["fixed_height_downsampled_width"] as! String)!
 					dict["height"] = 200
-					dict["mp4"] = noPath.stringByAppendingPathComponent("200_d.mp4")
+					dict["mp4"] = noPath.URLByAppendingPathComponent("200_d.mp4")
 				case .FixedWidth:
-					dict["url"] = noPath.stringByAppendingPathComponent("200w.gif")
+					dict["url"] = noPath.URLByAppendingPathComponent("200w.gif")
 					dict["width"] = 200
-					dict["height"] = (json["fixed_width_downsampled_height"] as String).toInt()!
-					dict["mp4"] = noPath.stringByAppendingPathComponent("200w.mp4")
+					dict["height"] = Int(json["fixed_width_downsampled_height"] as! String)!
+					dict["mp4"] = noPath.URLByAppendingPathComponent("200w.mp4")
 				case .FixedWidthDownsampled:
-					dict["url"] = noPath.stringByAppendingPathComponent("200w_d.gif")
+					dict["url"] = noPath.URLByAppendingPathComponent("200w_d.gif")
 					dict["width"] = 200
-					dict["height"] = (json["fixed_width_downsampled_height"] as String).toInt()!
-					dict["mp4"] = noPath.stringByAppendingPathComponent("200w_d.mp4")
+					dict["height"] = Int(json["fixed_width_downsampled_height"] as! String)!
+					dict["mp4"] = noPath.URLByAppendingPathComponent("200w_d.mp4")
 				case .Original:
 					dict["url"] = img
-					dict["width"] = (json["image_width"] as String).toInt()!
-					dict["height"] = (json["image_height"] as String).toInt()!
+					dict["width"] = Int(json["image_width"] as! String)!
+					dict["height"] = Int(json["image_height"] as! String)!
 					dict["mp4"] = json["image_mp4_url"]
 				}
 
 				if still {
-					let url = dict["url"] as String
-					dict["url"] = url.stringByDeletingPathExtension + "_s.gif"
+					let url = dict["url"] as! NSURL
+					dict["url"] = url.URLByDeletingPathExtension?.URLByAppendingPathComponent("_s.gif")
 					dict.removeValueForKey("mp4")
 				}
 
@@ -197,9 +199,9 @@ public class Giphy {
 	/**
 		Initialize a new Giphy client.
 		
-		:param: apiKey Your API key from giphy.
+		- parameter apiKey: Your API key from giphy.
 		
-		:param: URLSessionConfiguration The NSURLSessionConfiguration used to initiate a new session that all requests are sent with.
+		- parameter URLSessionConfiguration: The NSURLSessionConfiguration used to initiate a new session that all requests are sent with.
 	
 		:return: A new Giphy instance.
 	*/
@@ -213,7 +215,7 @@ public class Giphy {
 	/**
 		Initalize a new Giphy client with the default NSURLSessionConfiguration
 		
-		:param: apiKey Your Giphy API key.
+		- parameter apiKey: Your Giphy API key.
 
 		:return: A new Giphy instance.
 	*/
@@ -224,17 +226,17 @@ public class Giphy {
 	/**
 		Perform a search request of a gif from Giphy.
 
-		:param: query The search query.
+		- parameter query: The search query.
 	
-		:param: limit Limit the number of results per page. From 1 to 100. Optional.
+		- parameter limit: Limit the number of results per page. From 1 to 100. Optional.
 		
-		:param: offset The offset in the number of the results. Optional.
+		- parameter offset: The offset in the number of the results. Optional.
 
-		:param: rating The max user discretion rating of gifs. Optional.
+		- parameter rating: The max user discretion rating of gifs. Optional.
 		
-		:param: completionHandler Completion handler called once the request is complete.
+		- parameter completionHandler: Completion handler called once the request is complete.
 
-		:returns: An NSURLSessionDataTask for the request that has already been resumed.
+		- returns: An NSURLSessionDataTask for the request that has already been resumed.
 	*/
 	public func search(query: String, limit: UInt?, offset: UInt?, rating: Gif.Rating?, completionHandler: ([Gif]?, Pagination?, NSError?) -> Void) -> NSURLSessionDataTask {
 
@@ -258,11 +260,11 @@ public class Giphy {
 	/** 
 		Perform a request for a gif by its Giphy id.
 		
-		:param: id The id of the Giphy gif.
+		- parameter id: The id of the Giphy gif.
 		
-		:param: completionHandler Completion handler called once the request is complete.
+		- parameter completionHandler: Completion handler called once the request is complete.
 
-		:returns: An NSURLSessionDataTask for the request that has already been resumed.
+		- returns: An NSURLSessionDataTask for the request that has already been resumed.
 	*/
 	public func gif(id: String, completionHandler: (Gif?, NSError?) -> Void) -> NSURLSessionDataTask {
 
@@ -274,15 +276,15 @@ public class Giphy {
 	/**
 		Perform a request for multiple gifs by id.
 		
-		:param: ids An array of ids.
+		- parameter ids: An array of ids.
 		
-		:param: completionHandler Completion handler called once the request is complete.
+		- parameter completionHandler: Completion handler called once the request is complete.
 
-		:returns: An NSURLSessionDataTask for the request that has already been resumed.	
+		- returns: An NSURLSessionDataTask for the request that has already been resumed.	
 	*/
 	public func gifs(ids: [String], completionHandler: ([Gif]?, NSError?) -> Void) -> NSURLSessionDataTask {
 
-		let params: [String : AnyObject] = ["ids" : ",".join(ids)]
+		let params: [String : AnyObject] = ["ids" : ids.joinWithSeparator(",")]
 
 		return performRequest("", params: params) {
 			completionHandler($0,$2)
@@ -292,13 +294,13 @@ public class Giphy {
 	/**
 		Perform a translate request.
 		
-		:param: term The term to translate into a gif.
+		- parameter term: The term to translate into a gif.
 		
-		:param: rating The max user discretion rating of gifs. Optional.
+		- parameter rating: The max user discretion rating of gifs. Optional.
 
-		:param: completionHandler Completion handler called once the request is complete.
+		- parameter completionHandler: Completion handler called once the request is complete.
 
-		:returns: An NSURLSessionDataTask for the request that has already been resumed.
+		- returns: An NSURLSessionDataTask for the request that has already been resumed.
 	*/
 	public func translate(term: String, rating: Gif.Rating?, completionHandler: (Gif?, NSError?) -> Void) -> NSURLSessionDataTask {
 
@@ -316,13 +318,13 @@ public class Giphy {
 	/**
 		Perform a request for a random gif.
 		
-		:param: tag Tag that the random gif should have. Optional.
+		- parameter tag: Tag that the random gif should have. Optional.
 		
-		:param: rating The max user discretion rating of gifs. Optional.
+		- parameter rating: The max user discretion rating of gifs. Optional.
 		
-		:param: completionHandler Completion handler called once the request is complete.
+		- parameter completionHandler: Completion handler called once the request is complete.
 
-		:returns: An NSURLSessionDataTask for the request that has already been resumed.
+		- returns: An NSURLSessionDataTask for the request that has already been resumed.
 	*/
 	public func random(tag: String?, rating: Gif.Rating?, completionHandler: (Gif?, NSError?) -> Void) -> NSURLSessionDataTask{
 
@@ -342,13 +344,13 @@ public class Giphy {
 	/**
 		Perform a request for the trending gifs.
 		
-		:param: limit Limit the number of results per page. From 1 to 100. Optional.
+		- parameter limit: Limit the number of results per page. From 1 to 100. Optional.
 		
-		:param: rating The max user discretion rating of gifs. Optional.
+		- parameter rating: The max user discretion rating of gifs. Optional.
 
-		:param: completionHandler Completion handler called once the request is complete.
+		- parameter completionHandler: Completion handler called once the request is complete.
 
-		:returns: An NSURLSessionDataTask for the request that has already been resumed.
+		- returns: An NSURLSessionDataTask for the request that has already been resumed.
 	*/
 	public func trending(limit: UInt?, offset: UInt?, rating: Gif.Rating?, completionHandler: ([Gif]?, Pagination?, NSError?) -> Void) -> NSURLSessionDataTask {
 
@@ -360,7 +362,7 @@ public class Giphy {
 			params["rating"] = rat.rawValue
 		}
 		if let off = offset {
-			params["offset"] = offset
+			params["offset"] = off
 		}
 
 		return performRequest("trending", params: params, completionHandler: completionHandler)
@@ -368,7 +370,7 @@ public class Giphy {
 
 	func performRequest(endpoint: String, var params: [String: AnyObject]?, completionHandler: ([Gif]?, Pagination?, NSError?) -> Void) -> NSURLSessionDataTask {
 
-		var urlString = BaseURLString.stringByAppendingPathComponent(endpoint)
+		var urlString = (BaseURLString as NSString).stringByAppendingPathComponent(endpoint)
 		if params == nil {
 			params = [:]
 		}
@@ -377,7 +379,7 @@ public class Giphy {
 
 		urlString += "?"
 		
-		for (i, (k, v)) in enumerate(params!) {
+		for (i, (k, v)) in (params!).enumerate() {
 			urlString += k.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
 			urlString += "="
 			urlString += "\(v)".stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
@@ -395,40 +397,41 @@ public class Giphy {
 			}
 
 			var error: NSError?
-
-			let json: [String:AnyObject]? = NSJSONSerialization.JSONObjectWithData($0, options: nil, error: &error) as [String: AnyObject]?
-
-			if error != nil {
-				completionHandler(nil, nil, error)
+            
+            var json: [String:AnyObject]
+            do {
+                try json = NSJSONSerialization.JSONObjectWithData($0!, options: []) as! [String: AnyObject]
+            } catch let err as NSError {
+				completionHandler(nil, nil, err)
 				return
 			}
 
-			let meta: [String:AnyObject]? = json!["meta"] as [String:AnyObject]?
+			let meta: [String:AnyObject]? = json["meta"] as! [String:AnyObject]?
 
-			let status: Int = meta!["status"] as Int
+			let status: Int = meta!["status"] as! Int
 
 			if status != 200 {
 
-				error = NSError(domain: NSURLErrorDomain, code: NSURLErrorBadServerResponse, userInfo: [NSLocalizedDescriptionKey: meta!["msg"] as String])
+				error = NSError(domain: NSURLErrorDomain, code: NSURLErrorBadServerResponse, userInfo: [NSLocalizedDescriptionKey: meta!["msg"] as! String])
 
 				completionHandler(nil, nil, error)
 				return
 			}
 
 			var pagination: Pagination?
-			if let p = json!["pagination"] as? [String:Int] {
+			if let p = json["pagination"] as? [String:Int] {
 
 				pagination = Pagination(count: p["count"]!, offset: p["offset"]!)
 
 			}
 			var gifs: [Gif] = []
 
-			if let data = json!["data"] as? [[String:AnyObject]] {
+			if let data = json["data"] as? [[String:AnyObject]] {
 
 				for v in data {
 					gifs.append(Gif(json: v))
 				}
-			} else if let data = json!["data"] as? [String:AnyObject] {
+			} else if let data = json["data"] as? [String:AnyObject] {
 				gifs.append(Gif(json: data))
 			}
 
@@ -439,14 +442,14 @@ public class Giphy {
 	}
 }
 
-extension Giphy.Gif: Printable {
+extension Giphy.Gif: CustomStringConvertible {
 
 	public var description: String {
 		return "Gif {\n\\t\(json)\n}"
 	}
 }
 
-extension Giphy.Gif.Rating: Printable {
+extension Giphy.Gif.Rating: CustomStringConvertible {
 
 	public var description: String {
 		return rawValue

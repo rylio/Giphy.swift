@@ -23,6 +23,7 @@
 
 import Foundation
 import XCTest
+import Giphy
 
 class GiphyTests: XCTestCase {
 
@@ -56,7 +57,7 @@ class GiphyTests: XCTestCase {
 		let sema = dispatch_semaphore_create(0)
 
 		giphy.gif("1") { (gif, err) -> Void in
-			println(err == nil)
+			print(err == nil)
 			XCTAssert(true, "NOTTET")
 			XCTAssert(err == nil, err?.localizedDescription ?? "")
 			XCTAssert(gif != nil, "Gif is nil")
@@ -113,7 +114,7 @@ class GiphyTests: XCTestCase {
 
 		let sema = dispatch_semaphore_create(0)
 
-		giphy.trending(10, rating: nil) {
+        giphy.trending(10, offset: 0, rating: nil) {
 
 			XCTAssert($2 == nil, $2?.localizedDescription ?? "")
 			XCTAssert($0 != nil, "Gifs is nil")
