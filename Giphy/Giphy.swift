@@ -23,13 +23,12 @@
 
 import Foundation
 
-/// The public api key for Giphy, should only be used for testing.
-public let PublicBetaAPIKey = "dc6zaTOxFJmzC"
-
-let BaseURLString = "http://api.giphy.com/v1/gifs"
-
 /// Giphy API client.
 public class Giphy {
+	/// The public api key for Giphy, should only be used for testing.
+	public static let PublicBetaAPIKey = "dc6zaTOxFJmzC"
+
+	static let BaseURLString = "http://api.giphy.com/v1/gifs"
 
 	/// Pagination for Giphy endpoints search and trending.
 	public struct Pagination {
@@ -94,10 +93,10 @@ public class Giphy {
 			init(dict: [String: AnyObject]) {
 
 				URL = NSURL(string: dict["url"] as! String)!
-				width = dict["width"] as! Int
-				height = dict["height"] as! Int
-				size = dict["size"] as? Int
-				frames = dict["frames"] as? Int
+				width = (dict["width"]?.integerValue)!
+				height = (dict["height"]?.integerValue)!
+				size = dict["size"]?.integerValue
+				frames = dict["frames"]?.integerValue
 				if let mp4 = dict["mp4"] as? String {
 					mp4URL = NSURL(string: mp4)
                 } else {
@@ -370,7 +369,7 @@ public class Giphy {
 
 	func performRequest(endpoint: String, var params: [String: AnyObject]?, completionHandler: ([Gif]?, Pagination?, NSError?) -> Void) -> NSURLSessionDataTask {
 
-		var urlString = (BaseURLString as NSString).stringByAppendingPathComponent(endpoint)
+		var urlString = (Giphy.BaseURLString as NSString).stringByAppendingPathComponent(endpoint)
 		if params == nil {
 			params = [:]
 		}
