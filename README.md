@@ -6,11 +6,11 @@ A [Giphy](http://giphy.com/) API client in Swift.
 
 ```swift
 
-    let g = giphy(apiKey: Giphy.PublicBetaAPIKey)
+    let g = Giphy(apiKey: Giphy.PublicBetaAPIKey)
 
     // Search
 
-    g.search("dogs", limit: nil, offset: nil, rating: nil) { gifs, pagination, err in
+    g.search("dogs", nil, offset: nil, rating: nil) { gifs, pagination, err in
 
         // Do something with gifs
     }
@@ -38,14 +38,14 @@ A [Giphy](http://giphy.com/) API client in Swift.
 
     // Get random gif
 
-    g.random(tag: "optional tag", rating: nil) { gif, err in
+    g.random("optional tag", rating: nil) { gif, err in
 
 
     }
 
     // Get trending gifs
 
-    g.trending(limit: nil, offset: nil, rating: nil) { gifs, pagination, err in
+    g.trending(nil, offset: nil, rating: nil) { gifs, pagination, err in
 
     }
 ```
