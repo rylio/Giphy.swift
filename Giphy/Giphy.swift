@@ -24,9 +24,9 @@
 import Foundation
 
 /// Giphy API client.
-public class Giphy {
+open class Giphy {
 	/// The public api key for Giphy, should only be used for testing.
-	public static let PublicBetaAPIKey = "dc6zaTOxFJmzC"
+	open static let PublicBetaAPIKey = "dc6zaTOxFJmzC"
 
 	static let BaseURLString = "http://api.giphy.com/v1/gifs"
 
@@ -41,7 +41,7 @@ public class Giphy {
 	}
 
 	// Represents the gif data from an api call.
-	public class Gif {
+	open class Gif {
 
 		/// The user discretion rating of a gif.
 		public enum Rating: String {
@@ -73,7 +73,7 @@ public class Giphy {
 		public struct ImageMetadata {
 
 			/// The url of the gif.
-			public let URL: NSURL
+			public let URL: Foundation.URL
 
 			/// The width of the gif in pixels.
 			public let width: Int
@@ -88,38 +88,39 @@ public class Giphy {
 			public let frames: Int?
 
 			/// URL to the gif in mp4 format, all image verions include this except for stills.
-			public let mp4URL: NSURL?
+			public let mp4URL: Foundation.URL?
 
-			init(dict: [String: AnyObject]) {
+			init(dict: [String: Any]) {
 
-				URL = NSURL(string: dict["url"] as! String)!
-				width = (dict["width"]?.integerValue)!
-				height = (dict["height"]?.integerValue)!
-				size = dict["size"]?.integerValue
-				frames = dict["frames"]?.integerValue
+				URL = Foundation.URL(string: dict["url"] as! String)!
+				width = ((dict["width"] as AnyObject).intValue)!
+				height = ((dict["height"] as AnyObject).intValue)!
+				size = (dict["size"] as AnyObject).intValue
+				frames = (dict["frames"] as AnyObject).intValue
 				if let mp4 = dict["mp4"] as? String {
-					mp4URL = NSURL(string: mp4)
-                } else {
-                    mp4URL = NSURL()
+					mp4URL = Foundation.URL(string: mp4)
+                }
+                else {
+                    mp4URL = nil
                 }
 			}
 		}
 
 		/// The raw json data from giphy for the gif object.
-		public let json: [String:AnyObject]
+		open let json: [String:AnyObject]
 
 		/// The giphy id for the gif.
-		public var id: String {
+		open var id: String {
 			return json["id"] as! String
 		}
 
 		/// The URL to the giphy page of the gif.
-		public var giphyURL: NSURL {
-			return NSURL(string: json["url"] as! String)!
+		open var giphyURL: URL {
+			return URL(string: json["url"] as! String)!
 		}
 
 		/// User discretion rating of the gif.
-		public var rating: Rating {
+		open var rating: Rating {
 			return Rating(rawValue: json["rating"] as! String)!
 		}
 
@@ -136,7 +137,8 @@ public class Giphy {
 		
 			:return: The image metadata for the image type.
 		*/
-		public func gifMetadataForType(type: ImageVersion, var still: Bool) -> ImageMetadata {
+		public func gifMetadataForType(_ type: ImageVersion, still: Bool) -> ImageMetadata {
+			var still = still
 
 			if type == .FixedHeightDownsampled || type == .FixedWidthDownsampled {
 				still = false
@@ -147,43 +149,43 @@ public class Giphy {
 				return ImageMetadata(dict: image)
 			} else  {
 
-				var dict: [String:AnyObject] = [:]
-				let img = json["image_url"] as! NSURL
-				let noPath = img.URLByDeletingLastPathComponent!
+				var dict: [String:Any] = [:]
+				let img = json["image_url"] as! URL
+				let noPath = img.deletingLastPathComponent()
 
 				switch type {
 				case .FixedHeight:
-					dict["url"] = noPath.URLByAppendingPathComponent("200.gif")
+					dict["url"] = noPath.appendingPathComponent("200.gif") as AnyObject?
 					dict["width"] = Int(json["fixed_height_downsampled_width"] as! String)!
-					dict["height"] = 200
-					dict["mp4"] = noPath.URLByAppendingPathComponent("200.mp4")
+					dict["height"] = 200 as AnyObject?
+					dict["mp4"] = noPath.appendingPathComponent("200.mp4") as AnyObject?
 
 				case .FixedHeightDownsampled:
-					dict["url"] = noPath.URLByAppendingPathComponent("200_d.gif")
+					dict["url"] = noPath.appendingPathComponent("200_d.gif") as AnyObject?
 					dict["width"] = Int(json["fixed_height_downsampled_width"] as! String)!
-					dict["height"] = 200
-					dict["mp4"] = noPath.URLByAppendingPathComponent("200_d.mp4")
+					dict["height"] = 200 as AnyObject?
+					dict["mp4"] = noPath.appendingPathComponent("200_d.mp4") as AnyObject?
 				case .FixedWidth:
-					dict["url"] = noPath.URLByAppendingPathComponent("200w.gif")
-					dict["width"] = 200
+					dict["url"] = noPath.appendingPathComponent("200w.gif") as AnyObject?
+					dict["width"] = 200 as AnyObject?
 					dict["height"] = Int(json["fixed_width_downsampled_height"] as! String)!
-					dict["mp4"] = noPath.URLByAppendingPathComponent("200w.mp4")
+					dict["mp4"] = noPath.appendingPathComponent("200w.mp4") as AnyObject?
 				case .FixedWidthDownsampled:
-					dict["url"] = noPath.URLByAppendingPathComponent("200w_d.gif")
-					dict["width"] = 200
+					dict["url"] = noPath.appendingPathComponent("200w_d.gif") as AnyObject?
+					dict["width"] = 200 as AnyObject?
 					dict["height"] = Int(json["fixed_width_downsampled_height"] as! String)!
-					dict["mp4"] = noPath.URLByAppendingPathComponent("200w_d.mp4")
+					dict["mp4"] = noPath.appendingPathComponent("200w_d.mp4") as AnyObject?
 				case .Original:
-					dict["url"] = img
+					dict["url"] = img as AnyObject?
 					dict["width"] = Int(json["image_width"] as! String)!
 					dict["height"] = Int(json["image_height"] as! String)!
 					dict["mp4"] = json["image_mp4_url"]
 				}
 
 				if still {
-					let url = dict["url"] as! NSURL
-					dict["url"] = url.URLByDeletingPathExtension?.URLByAppendingPathComponent("_s.gif")
-					dict.removeValueForKey("mp4")
+					let url = dict["url"] as! URL
+					dict["url"] = url.deletingPathExtension().appendingPathComponent("_s.gif") as AnyObject?
+					dict.removeValue(forKey: "mp4")
 				}
 
 				return ImageMetadata(dict: dict)
@@ -191,7 +193,7 @@ public class Giphy {
 		}
 	}
 
-	let session: NSURLSession
+	let session: URLSession
 
 	let apiKey: String
 
@@ -204,9 +206,9 @@ public class Giphy {
 	
 		:return: A new Giphy instance.
 	*/
-	public init(apiKey key: String, URLSessionConfiguration sessionConfiguration: NSURLSessionConfiguration) {
+	public init(apiKey key: String, URLSessionConfiguration sessionConfiguration: URLSessionConfiguration) {
 
-		session = NSURLSession(configuration: sessionConfiguration)
+		session = URLSession(configuration: sessionConfiguration)
 
 		apiKey = key
 	}
@@ -219,7 +221,7 @@ public class Giphy {
 		:return: A new Giphy instance.
 	*/
 	public convenience init(apiKey key: String) {
-		self.init(apiKey: key, URLSessionConfiguration: NSURLSessionConfiguration.defaultSessionConfiguration())
+		self.init(apiKey: key, URLSessionConfiguration: URLSessionConfiguration.default)
 	}
 
 	/**
@@ -237,20 +239,20 @@ public class Giphy {
 
 		- returns: An NSURLSessionDataTask for the request that has already been resumed.
 	*/
-	public func search(query: String, limit: UInt?, offset: UInt?, rating: Gif.Rating?, completionHandler: ([Gif]?, Pagination?, NSError?) -> Void) -> NSURLSessionDataTask {
+	open func search(_ query: String, limit: UInt?, offset: UInt?, rating: Gif.Rating?, completionHandler: @escaping ([Gif]?, Pagination?, NSError?) -> Void) -> URLSessionDataTask {
 
-		var params: [String : AnyObject] = ["q":query]
+		var params: [String : AnyObject] = ["q":query as AnyObject]
 
 		if let lim = limit {
-			params["limit"] = lim
+			params["limit"] = lim as AnyObject?
 		}
 
 		if let off = offset {
-			params["offset"] = off
+			params["offset"] = off as AnyObject?
 		}
 
 		if let rat = rating {
-			params["rating"] = rat.rawValue
+			params["rating"] = rat.rawValue as AnyObject?
 		}
 
 		return performRequest("search", params: params, completionHandler: completionHandler)
@@ -265,7 +267,7 @@ public class Giphy {
 
 		- returns: An NSURLSessionDataTask for the request that has already been resumed.
 	*/
-	public func gif(id: String, completionHandler: (Gif?, NSError?) -> Void) -> NSURLSessionDataTask {
+	open func gif(_ id: String, completionHandler: @escaping (Gif?, NSError?) -> Void) -> URLSessionDataTask {
 
 		return performRequest(id, params: nil) {
 			completionHandler($0?.first,$2)
@@ -281,9 +283,9 @@ public class Giphy {
 
 		- returns: An NSURLSessionDataTask for the request that has already been resumed.	
 	*/
-	public func gifs(ids: [String], completionHandler: ([Gif]?, NSError?) -> Void) -> NSURLSessionDataTask {
+	open func gifs(_ ids: [String], completionHandler: @escaping ([Gif]?, NSError?) -> Void) -> URLSessionDataTask {
 
-		let params: [String : AnyObject] = ["ids" : ids.joinWithSeparator(",")]
+		let params: [String : AnyObject] = ["ids" : ids.joined(separator: ",") as AnyObject]
 
 		return performRequest("", params: params) {
 			completionHandler($0,$2)
@@ -301,12 +303,12 @@ public class Giphy {
 
 		- returns: An NSURLSessionDataTask for the request that has already been resumed.
 	*/
-	public func translate(term: String, rating: Gif.Rating?, completionHandler: (Gif?, NSError?) -> Void) -> NSURLSessionDataTask {
+	open func translate(_ term: String, rating: Gif.Rating?, completionHandler: @escaping (Gif?, NSError?) -> Void) -> URLSessionDataTask {
 
-		var params: [String : AnyObject] = ["s": term]
+		var params: [String : AnyObject] = ["s": term as AnyObject]
 
 		if let rat = rating {
-			params["rating"] = rat.rawValue
+			params["rating"] = rat.rawValue as AnyObject?
 		}
 
 		return performRequest("translate", params: params) {
@@ -325,14 +327,14 @@ public class Giphy {
 
 		- returns: An NSURLSessionDataTask for the request that has already been resumed.
 	*/
-	public func random(tag: String?, rating: Gif.Rating?, completionHandler: (Gif?, NSError?) -> Void) -> NSURLSessionDataTask{
+	open func random(_ tag: String?, rating: Gif.Rating?, completionHandler: @escaping (Gif?, NSError?) -> Void) -> URLSessionDataTask{
 
 		var params: [String : AnyObject] = [:]
 		if let t = tag {
-			params["tag"] = t
+			params["tag"] = t as AnyObject?
 		}
 		if let rat = rating {
-			params["rating"] = rat.rawValue
+			params["rating"] = rat.rawValue as AnyObject?
 		}
 
 		return performRequest("random", params: params) {
@@ -351,47 +353,50 @@ public class Giphy {
 
 		- returns: An NSURLSessionDataTask for the request that has already been resumed.
 	*/
-	public func trending(limit: UInt?, offset: UInt?, rating: Gif.Rating?, completionHandler: ([Gif]?, Pagination?, NSError?) -> Void) -> NSURLSessionDataTask {
+	open func trending(_ limit: UInt?, offset: UInt?, rating: Gif.Rating?, completionHandler: @escaping ([Gif]?, Pagination?, NSError?) -> Void) -> URLSessionDataTask {
 
 		var params: [String : AnyObject] = [:]
 		if let lim = limit {
-			params["limit"] = lim
+			params["limit"] = lim as AnyObject?
 		}
 		if let rat = rating {
-			params["rating"] = rat.rawValue
+			params["rating"] = rat.rawValue as AnyObject?
 		}
 		if let off = offset {
-			params["offset"] = off
+			params["offset"] = off as AnyObject?
 		}
 
 		return performRequest("trending", params: params, completionHandler: completionHandler)
 	}
 
-	func performRequest(endpoint: String, var params: [String: AnyObject]?, completionHandler: ([Gif]?, Pagination?, NSError?) -> Void) -> NSURLSessionDataTask {
+	func performRequest(_ endpoint: String, params: [String: AnyObject]?, completionHandler: @escaping ([Gif]?, Pagination?, NSError?) -> Void) -> URLSessionDataTask {
+		var params = params
 
-		var urlString = (Giphy.BaseURLString as NSString).stringByAppendingPathComponent(endpoint)
+		var urlString = (Giphy.BaseURLString as NSString).appendingPathComponent(endpoint)
 		if params == nil {
 			params = [:]
 		}
 
-		params!["api_key"] = apiKey
+		params!["api_key"] = apiKey as AnyObject?
 
 		urlString += "?"
 		
-		for (i, (k, v)) in (params!).enumerate() {
-			urlString += k.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
+        var i = 0
+		for (k, v) in params! {
+			urlString += k.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
 			urlString += "="
-			urlString += "\(v)".stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
+			urlString += "\(v)".addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
 			if (i != params!.count - 1) {
 				urlString += "&"
-			}
+            }
+            i += 1
 		}
 
-		let dataTask = session.dataTaskWithURL(NSURL(string: urlString)!) {
+		let dataTask = session.dataTask(with: URL(string: urlString)!, completionHandler: {
 
 			if $2 != nil {
 
-				completionHandler(nil,nil, $2)
+				completionHandler(nil,nil, $2 as NSError?)
 				return
 			}
 
@@ -399,7 +404,7 @@ public class Giphy {
             
             var json: [String:AnyObject]
             do {
-                try json = NSJSONSerialization.JSONObjectWithData($0!, options: []) as! [String: AnyObject]
+                try json = JSONSerialization.jsonObject(with: $0!, options: []) as! [String: AnyObject]
             } catch let err as NSError {
 				completionHandler(nil, nil, err)
 				return
@@ -435,7 +440,7 @@ public class Giphy {
 			}
 
 			completionHandler(gifs, pagination, nil)
-		}
+		}) 
 		dataTask.resume()
 		return dataTask
 	}

@@ -40,88 +40,88 @@ class GiphyTests: XCTestCase {
 
     func testSearch() {
 
-		let sema = dispatch_semaphore_create(0)
+		let sema = DispatchSemaphore(value: 0)
 
 		giphy.search("fun", limit: 1, offset: nil, rating: nil) {
 
 			XCTAssert($2 == nil, $2?.localizedDescription ?? "")
 			XCTAssert($0!.count == 1, "Results weren't one")
-			dispatch_semaphore_signal(sema)
+			sema.signal()
 		}
 
-		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER)
+		sema.wait(timeout: DispatchTime.distantFuture)
     }
 
 	func testGif() {
 
-		let sema = dispatch_semaphore_create(0)
+		let sema = DispatchSemaphore(value: 0)
 
 		giphy.gif("1") { (gif, err) -> Void in
 			print(err == nil)
 			XCTAssert(true, "NOTTET")
 			XCTAssert(err == nil, err?.localizedDescription ?? "")
 			XCTAssert(gif != nil, "Gif is nil")
-			dispatch_semaphore_signal(sema)
+			sema.signal()
 		}
 
-		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER)
+		sema.wait(timeout: DispatchTime.distantFuture)
 	}
 
 	func testGifs() {
 
-		let sema = dispatch_semaphore_create(0)
+		let sema = DispatchSemaphore(value: 0)
 
 		giphy.gifs(["1","12cAJO8mkO3hUA","hLaUjPEPBbRxm"]) { (gifs, err) -> Void in
 
 			XCTAssert(err == nil, err?.localizedDescription ?? "")
 			XCTAssert(gifs != nil, "Gif is nil")
 			XCTAssert(gifs!.count == 3, "")
-			dispatch_semaphore_signal(sema)
+			sema.signal()
 		}
 
-		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER)
+		sema.wait(timeout: DispatchTime.distantFuture)
 	}
 
 	func testTranslate() {
 
-		let sema = dispatch_semaphore_create(0)
+		let sema = DispatchSemaphore(value: 0)
 
 		giphy.translate("cat", rating: nil) { (gif, err) -> Void in
 
 			XCTAssert(err == nil, err?.localizedDescription ?? "")
 			XCTAssert(gif != nil, "Gif is nil")
-			dispatch_semaphore_signal(sema)
+			sema.signal()
 		}
 
-		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER)
+		sema.wait(timeout: DispatchTime.distantFuture)
 	}
 
 	func testRandom() {
 
-		let sema = dispatch_semaphore_create(0)
+		let sema = DispatchSemaphore(value: 0)
 
 		giphy.random(nil, rating: nil) {
 
 			XCTAssert($1 == nil, $1?.localizedDescription ?? "")
 			XCTAssert($0 != nil, "Gif was nil")
-			dispatch_semaphore_signal(sema)
+			sema.signal()
 		}
 
-		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER)
+		sema.wait(timeout: DispatchTime.distantFuture)
 	}
 
 	func testTrending() {
 
-		let sema = dispatch_semaphore_create(0)
+		let sema = DispatchSemaphore(value: 0)
 
         giphy.trending(10, offset: 0, rating: nil) {
 
 			XCTAssert($2 == nil, $2?.localizedDescription ?? "")
 			XCTAssert($0 != nil, "Gifs is nil")
 			XCTAssert($0!.count == 10, "Gifs count is wrong")
-			dispatch_semaphore_signal(sema)
+			sema.signal()
 		}
 
-		dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER)
+		sema.wait(timeout: DispatchTime.distantFuture)
 	}
 }
